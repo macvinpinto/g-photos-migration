@@ -1,0 +1,32 @@
+<!-- views/index.ejs -->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>EJS Example</title>
+</head>
+
+<body>
+    <h1>
+        Yo
+    </h1>
+
+    
+    <% if (!user1) { %>
+        <a href="/auth/google1">Login with Google</a>
+    <% } else { %>
+        <p>Welcome, <%= user1.displayName %>!</p>
+        <a href="/logout">Logout</a>
+    <% } %>
+
+    <% if (!user2) { %>
+        <a href="/auth/google2">Login with Google</a>
+    <% } else { %>
+        <p>Welcome, <%= user2.displayName %>!</p>
+        <a href="/logout">Logout</a>
+    <% } %>
+    
+</body>
+
+</html>
