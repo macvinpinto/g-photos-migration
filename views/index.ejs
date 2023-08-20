@@ -8,22 +8,21 @@
 </head>
 
 <body>
-    <h1>
-        Yo
-    </h1>
 
     
     <% if (!user1) { %>
-        <a href="/auth/google1">Login with Google</a>
+        <a href="/auth/google/user1">Login with Google</a>
     <% } else { %>
-        <p>Welcome, <%= user1.displayName %>!</p>
+        <p>Welcome, <%= user1.displayName %>! Your email is <%= user1.emails[0].value %></p>
+        <p> <%= user1.accessToken %> </p>
         <a href="/logout">Logout</a>
     <% } %>
 
     <% if (!user2) { %>
-        <a href="/auth/google2">Login with Google</a>
+        <a href="/auth/google/user2">Login with Google</a>
     <% } else { %>
-        <p>Welcome, <%= user2.displayName %>!</p>
+        <p>Welcome, <%= user2.displayName %>! Your email is <%= user2.emails[0].value %></p>
+        <p> <%= user2.accessToken %> </p>
         <a href="/logout">Logout</a>
     <% } %>
     

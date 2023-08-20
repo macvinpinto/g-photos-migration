@@ -4,9 +4,16 @@ import express from 'express';
 import session from 'express-session';
 import passport from 'passport';
 import GoogleStrategy from 'passport-google-oauth20';
+import googleStrategyBuilder from './utils/google-strategy'
 
 const app = express();
 const port = 8080;
+
+interface User extends Express.User, Express.AuthInfo{}
+
+let sourceUser: User | undefined;
+let targetUser: User | undefined;
+
 
 // Middleware
 app.use(
@@ -20,21 +27,10 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Configure Google OAuth 2.0 Strategy
-passport.use(
-    new GoogleStrategy.Strategy(
-        {
-            clientID: process.env['GOOGLE_CLIENT_ID'] || '',
-            clientSecret: process.env['GOOGLE_CLIENT_SECRET'] || '',
-            callbackURL: 'http://localhost:8080/auth/google/callback',
-        },
-        (accessToken, refreshToken, profile, done) => {
-            // You can handle user data and store it in a database
-            console.log(profile);
+passport.use('google-user1', googleStrategyBuilder(1));
 
-            return done(null, profile);
-        }
-    )
-);
+// Configure Google OAuth 2.0 Strategy For Second User
+passport.use('google-user2', googleStrategyBuilder(2));
 
 // Serialize and Deserialize User
 passport.serializeUser((user: any, done) => {
@@ -52,18 +48,34 @@ app.set('views', path.join(__dirname, '../views'));
 // Define a route to render the EJS template
 app.get('/', (req, res) => {
     const data = { message: 'Hello, EJS with TypeScript!' };
-    res.render('index', { user1: req.user, user2: undefined });
+    res.render('index', { user1: sourceUser, user2: targetUser });
 });
 
 // Define Routes
-app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+app.get('/auth/google/user1', passport.authenticate('google-user1', { scope: ['profile', 'email'], }));
+app.get('/auth/google/user2', passport.authenticate('google-user2', { scope: ['profile', 'email'], }));
 
 app.get(
-    '/auth/google/callback',
-    passport.authenticate('google', { failureRedirect: '/' }),
+    '/auth/google/callback/user1',
+    passport.authenticate('google-user1', { failureRedirect: '/' }),
     (req, res) => {
         // Successful authentication, redirect or handle response
-        console.log('Successfull');
+        console.log('Successfull-1');
+        console.log(req.authInfo);
+        
+        sourceUser = { ...req.user, ...req.authInfo };
+
+        res.redirect('/');
+    }
+);
+
+app.get(
+    '/auth/google/callback/user2',
+    passport.authenticate('google-user2', { failureRedirect: '/' }),
+    (req, res) => {
+        // Successful authentication, redirect or handle response
+        console.log('Successfull-2');
+        targetUser = { ...req.user, ...req.authInfo }
 
         res.redirect('/');
     }
